@@ -1,0 +1,80 @@
+# ─── Desktop release pipeline ────────────────────────────────────────
+#
+# Triggers when you push a tag matching `v*` (e.g. `v1.0.1`).
+# Matrix-builds the macOS + Windows installers in parallel and uploads
+# them to the GitHub Release for that tag. electron-updater on user
+# machines pulls from that release.
+#
+# Trigger flow:
+#   1. cd apps/desktop && npm version patch   # bumps + commits + tags
+#   2. git push --follow-tags
+#   3. This action runs → installers attached to the release
+#
+# Manual run is also enabled via `workflow_dispatch`.
+
+name: Desktop Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (root workspace)
+        run: npm ci
+
+      - name: Build web bundle
+        run: npm run build --workspace=@tenk/web
+        env:
+          VITE_SUPABASE_URL:      ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: Build + package desktop (macOS)
+        if: matrix.os == 'macos-latest'
+        working-directory: apps/desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run build:electron
+          npx electron-builder --mac --publish always
+
+      - name: Build + package desktop (Windows)
+        if: matrix.os == 'windows-latest'
+        working-directory: apps/desktop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm run build:electron
+          npx electron-builder --win --publish always
+
+      # Upload installers as workflow artifacts too — handy for testing
+      # before the release goes public, even if `--publish always` failed.
+      - name: Upload installers as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tenk-${{ matrix.os }}
+          path: |
+            apps/desktop/release/*.dmg
+            apps/desktop/release/*.zip
+            apps/desktop/release/*.exe
+            apps/desktop/release/*.blockmap
+            apps/desktop/release/latest*.yml
+          if-no-files-found: ignore

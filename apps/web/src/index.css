@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * Theme variables are injected as INLINE styles on <html> by
+ * src/lib/theme.ts (applyTheme). The index.html boot script
+ * applies them before React mounts to prevent flash.
+ *
+ * We deliberately do NOT use :root / html[data-theme] CSS rules
+ * here — that approach was unreliable with Tailwind's compiled
+ * output. See theme.ts for the full explanation.
+ */
+
+/* ── Base ────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-deep);
+    color: var(--text-primary);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--scrollbar-thumb);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollbar-thumb-hover);
+  }
+}
+
+/* ── Component classes ───────────────────────────────────────────────────── */
+
+@layer components {
+  .btn-primary {
+    @apply bg-accent hover:bg-accent-light text-white font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .btn-secondary {
+    @apply bg-bg-elevated hover:bg-border border border-border text-text-secondary font-medium px-4 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .btn-ghost {
+    @apply hover:bg-bg-elevated text-text-muted hover:text-text-secondary px-3 py-2 rounded-lg transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-bg-card border border-border rounded-xl;
+  }
+
+  .card-elevated {
+    @apply bg-bg-elevated border border-border rounded-xl;
+  }
+
+  .input {
+    @apply bg-bg-elevated border border-border text-text-primary placeholder-text-muted rounded-lg px-3 py-2 w-full focus:outline-none focus:border-accent transition-colors;
+  }
+
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4;
+  }
+
+  .modal-content {
+    @apply bg-bg-card border border-border rounded-2xl p-6 w-full max-w-md shadow-2xl;
+  }
+}
+
+/* ── Utilities ───────────────────────────────────────────────────────────── */
+
+@layer utilities {
+  .glow-accent {
+    box-shadow: 0 0 20px rgba(124, 108, 240, 0.4);
+  }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #7c6cf0, #9080ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}

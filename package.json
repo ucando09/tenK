@@ -1,0 +1,29 @@
+{
+  "name": "tenk",
+  "version": "1.0.0",
+  "description": "10,000 hours mastery tracker — log skills, run Pomodoro sessions, and share progress with friends.",
+  "author": "tenK Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ucando09/tenK"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "web":          "npm run dev --workspace=apps/web",
+    "mobile":       "npm run start --workspace=apps/mobile",
+    "desktop":      "npm run dev --workspace=@tenk/desktop",
+    "build:web":    "npm run build --workspace=apps/web",
+    "build:shared": "npm run build --workspace=packages/shared",
+    "build:desktop":"npm run build --workspace=@tenk/desktop",
+    "lint":         "npm run lint --workspaces --if-present",
+    "typecheck":    "npm run typecheck --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

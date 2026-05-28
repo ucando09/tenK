@@ -1,0 +1,76 @@
+# electron-builder configuration.
+#
+# Reads version + name from package.json. Bundles the web build from
+# apps/web/dist as `Resources/web-dist/` inside the installed app.
+#
+# Auto-update: the `publish` block points at GitHub Releases. On a `npm
+# run release` call, electron-builder uploads installers + the
+# `latest-mac.yml` / `latest.yml` manifests that electron-updater reads
+# on the user's machine.
+
+appId: com.tenk.desktop
+productName: tenK
+copyright: Copyright © tenK
+
+directories:
+  output: release
+  buildResources: build
+
+# Bundle the entire desktop package + the web build as extra resources.
+files:
+  - dist-electron/**/*
+  - package.json
+  - "!**/*.ts"           # we already compiled the TS to dist-electron/
+  - "!tsconfig.json"
+
+extraResources:
+  - from: "../web/dist"
+    to:   "web-dist"
+    filter: ["**/*"]
+
+# ── macOS ─────────────────────────────────────────────────────────────
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip            # for auto-update payloads
+      arch: [arm64, x64]
+  hardenedRuntime: false     # flip to true once you have a Developer ID cert
+  gatekeeperAssess: false
+  # If you later sign with Apple Developer ID, add:
+  # identity: "Developer ID Application: Your Name (TEAMID)"
+  # notarize: { teamId: "TEAMID" }
+  icon: build/icon.icns      # add this file when you have one
+dmg:
+  contents:
+    - x: 410, y: 150, type: link, path: /Applications
+    - x: 130, y: 150, type: file
+
+# ── Windows ───────────────────────────────────────────────────────────
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico       # add this file when you have one
+nsis:
+  oneClick: false
+  perMachine: false          # install to user folder; no admin prompt
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: tenK
+
+# ── Linux (optional, free since we're already on Electron) ────────────
+linux:
+  target: [AppImage]
+  category: Office
+
+# ── Where to upload installers when running `--publish always` ────────
+publish:
+  - provider: github
+    # owner and repo are auto-detected from package.json/repository if set;
+    # override here if you fork or move it:
+    # owner: ianlee
+    # repo:  10k-hours
+    releaseType: release      # "draft" to manually publish after CI builds

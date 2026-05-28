@@ -1,0 +1,35 @@
+{
+  "name": "@tenk/desktop",
+  "version": "1.0.2",
+  "description": "tenK desktop app — Electron wrapper around the web build.",
+  "private": true,
+  "main": "dist-electron/main.js",
+  "author": {
+    "name": "tenK",
+    "email": "noreply@tenk.app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ucando09/tenK"
+  },
+  "scripts": {
+    "build:web": "npm run build --workspace=@tenk/web",
+    "build:electron": "tsc -p tsconfig.json",
+    "build": "npm run build:web && npm run build:electron",
+    "dev": "concurrently -k \"npm run dev --workspace=@tenk/web\" \"wait-on http://localhost:5173 && npm run build:electron && electron .\"",
+    "pack": "npm run build && electron-builder --dir",
+    "release:mac": "npm run build && electron-builder --mac --publish never",
+    "release:win": "npm run build && electron-builder --win --publish never",
+    "release": "npm run build && electron-builder --mac --win --publish always"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.0",
+    "typescript": "^5.5.3",
+    "wait-on": "^8.0.0"
+  }
+}
