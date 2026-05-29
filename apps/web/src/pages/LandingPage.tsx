@@ -14,7 +14,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Apple, Monitor, ExternalLink, Loader2, X, Download,
+  Apple, Monitor, ExternalLink, Loader2, X, Download, Smartphone,
   Timer, Users, Flame, BarChart3, Sparkles, ChevronDown, Shield,
 } from 'lucide-react';
 import { useLatestRelease } from '../lib/hooks/useLatestRelease';
@@ -94,9 +94,37 @@ export function LandingPage() {
           everything you need to chase mastery, one session at a time.
         </p>
 
-        {/* ── Primary download button ── */}
+        {/* ── Primary download / mobile-warning ── */}
         <div className="flex flex-col items-center gap-3">
-          {loading ? (
+          {(detected === 'ios' || detected === 'android') ? (
+            /* Mobile visitors can't run the desktop installers, and the
+             * web app isn't tuned for small screens yet. Show a clear
+             * "use a computer" call-to-action instead of a download button
+             * that won't do anything useful. */
+            <div
+              className="w-full max-w-md rounded-2xl border p-5 text-left"
+              style={{ borderColor: '#f0c06040', backgroundColor: '#f0c06012' }}
+            >
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center mb-3"
+                style={{ backgroundColor: '#f0c06022', color: '#f0c060' }}
+              >
+                <Smartphone size={20} />
+              </div>
+              <h2 className="text-text-primary font-bold text-lg mb-1.5">
+                Mobile app is in development
+              </h2>
+              <p className="text-text-muted text-sm leading-relaxed mb-4">
+                tenK is built for focused study sessions on Mac, Windows, or in your browser.
+                The iOS and Android apps aren't ready yet —{' '}
+                <strong className="text-text-secondary">please open this page on your computer</strong>{' '}
+                to download or use the web version.
+              </p>
+              <p className="text-xs text-text-dim">
+                We'll launch mobile companion apps after the desktop experience stabilizes.
+              </p>
+            </div>
+          ) : loading ? (
             <div className="inline-flex items-center gap-2 px-7 py-4 rounded-2xl bg-bg-elevated text-text-muted">
               <Loader2 size={16} className="animate-spin" />
               Finding latest version…
@@ -120,23 +148,16 @@ export function LandingPage() {
             </div>
           )}
 
-          {/* Version + size meta */}
-          {primary && (
+          {/* Version + size meta (desktop only) */}
+          {primary && detected !== 'ios' && detected !== 'android' && (
             <p className="text-[11px] text-text-dim">
               {release?.version} · {formatMB(primary.asset.size)} · Free
             </p>
           )}
 
-          {/* Mobile / unsupported note */}
-          {(detected === 'ios' || detected === 'android') && (
-            <p className="text-xs text-text-muted mt-1 max-w-sm">
-              Mobile apps are still cooking — for now, the desktop app or web version is the best way to use tenK.
-            </p>
-          )}
 
-
-          {/* Other platforms disclosure */}
-          {release && (
+          {/* Other platforms disclosure — desktop only */}
+          {release && detected !== 'ios' && detected !== 'android' && (
             <button
               onClick={() => setShowAll((s) => !s)}
               className="mt-4 flex items-center gap-1 text-xs text-text-muted hover:text-accent transition-colors"

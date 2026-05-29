@@ -60,7 +60,7 @@ export function AuthPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex mb-4">
-            <img src="/favicon.svg" alt="tenK" className="w-16 h-16 rounded-2xl" />
+            <img src="/logo.png" alt="tenK" className="w-16 h-16" />
           </div>
           <h1 className="text-2xl font-bold text-text-primary">tenK</h1>
           <p className="text-text-muted mt-1.5 text-sm">
