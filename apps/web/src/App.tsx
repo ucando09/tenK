@@ -15,11 +15,16 @@ import { LandingPage } from './pages/LandingPage';
 import { JoinPage } from './pages/JoinPage';
 import type { User } from '@supabase/supabase-js';
 
+/* In the desktop wrapper, preload.ts exposes window.tenkDesktop. Web has
+ * no such object — we use this to decide whether `/` should show the
+ * marketing landing (web at tenk.kr) or jump straight into the app
+ * (Electron — user already installed it; landing would be confusing). */
+const isDesktop =
+  typeof window !== 'undefined' && !!(window as { tenkDesktop?: { isDesktop: boolean } }).tenkDesktop?.isDesktop;
+
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { userId } = useAppStore();
-  // Send guests to the public landing instead of straight to /auth so
-  // first-time visitors at tenk.kr see marketing + download CTA first.
-  if (!userId) return <Navigate to="/get" replace />;
+  if (!userId) return <Navigate to="/auth" replace />;
   return <>{children}</>;
 }
 
@@ -74,39 +79,68 @@ export default function App() {
   );
 }
 
+/* Default "go to the app" URL after sign-in / from auth.
+ *   - Desktop:  /          (root is the app)
+ *   - Web:      /timer     (root is the marketing page) */
+const APP_HOME = isDesktop ? '/' : '/timer';
+
 function AppRoutes({ user }: { user: User | null }) {
   return (
     <BrowserRouter>
       <Routes>
+        {/* ── Public ────────────────────────────────────────────────── */}
         <Route
           path="/auth"
-          element={user ? <Navigate to="/" replace /> : <AuthPage />}
+          element={user ? <Navigate to={APP_HOME} replace /> : <AuthPage />}
         />
-
-        <Route
-          path="/"
-          element={
-            <RequireAuth>
-              <AppLayout />
-            </RequireAuth>
-          }
-        >
-          <Route index           element={<TimerPage />}    />
-          <Route path="skills"   element={<SkillsPage />}   />
-          {/* /history is canonical; /calendar redirects for old links */}
-          <Route path="history"  element={<CalendarPage />} />
-          <Route path="calendar" element={<Navigate to="/history" replace />} />
-          <Route path="groups"   element={<GroupsPage />}   />
-          <Route path="profile"  element={<ProfilePage />}  />
-          <Route path="download" element={<DownloadPage />} />
-        </Route>
-
-        {/* Public landing page — share this URL with non-users */}
         <Route path="/get"        element={<LandingPage />} />
-
-        {/* Public invite link — JoinPage handles redirect after auth */}
         <Route path="/join/:code" element={<JoinPage />} />
-        <Route path="*"           element={<Navigate to="/" replace />} />
+
+        {/* ── Root: web shows landing page; desktop opens the app ──── */}
+        {isDesktop ? (
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <AppLayout />
+              </RequireAuth>
+            }
+          >
+            <Route index           element={<TimerPage />}    />
+            <Route path="timer"    element={<TimerPage />}    />
+            <Route path="skills"   element={<SkillsPage />}   />
+            <Route path="history"  element={<CalendarPage />} />
+            <Route path="calendar" element={<Navigate to="/history" replace />} />
+            <Route path="groups"   element={<GroupsPage />}   />
+            <Route path="profile"  element={<ProfilePage />}  />
+            <Route path="download" element={<DownloadPage />} />
+          </Route>
+        ) : (
+          <>
+            {/* Marketing landing at the root URL */}
+            <Route path="/" element={<LandingPage />} />
+
+            {/* Web app lives under flat routes — Sidebar links target
+             * these directly so logged-in users can still bookmark them. */}
+            <Route
+              element={
+                <RequireAuth>
+                  <AppLayout />
+                </RequireAuth>
+              }
+            >
+              <Route path="/timer"    element={<TimerPage />}    />
+              <Route path="/skills"   element={<SkillsPage />}   />
+              <Route path="/history"  element={<CalendarPage />} />
+              <Route path="/calendar" element={<Navigate to="/history" replace />} />
+              <Route path="/groups"   element={<GroupsPage />}   />
+              <Route path="/profile"  element={<ProfilePage />}  />
+              <Route path="/download" element={<DownloadPage />} />
+            </Route>
+          </>
+        )}
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

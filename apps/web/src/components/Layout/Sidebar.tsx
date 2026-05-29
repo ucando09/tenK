@@ -16,8 +16,12 @@ interface NavItem {
   icon:  typeof Timer;
 }
 
+/* Web sees marketing page at "/" — point Timer at /timer so logged-in
+ * users still land on the app when clicking the sidebar's Timer button.
+ * The desktop wrapper has /timer as an alias of "/", so this works in
+ * both environments without needing branched config. */
 const NAV_ITEMS: NavItem[] = [
-  { to: '/',        key: 'nav.timer',   icon: Timer    },
+  { to: '/timer',   key: 'nav.timer',   icon: Timer    },
   { to: '/skills',  key: 'nav.mastery', icon: BookOpen },
   { to: '/history', key: 'nav.history', icon: History  },
   { to: '/groups',  key: 'nav.groups',  icon: Users    },
@@ -121,7 +125,7 @@ export function Sidebar() {
             {activeSkills.map((skill) => (
               <NavLink
                 key={skill.id}
-                to="/"
+                to="/timer"
                 onClick={() => setActiveSkillId(skill.id)}
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm
                   transition-all duration-150 ${

@@ -64,7 +64,7 @@ export function LandingPage() {
           <span className="text-text-primary font-bold text-lg tracking-tight">tenK</span>
         </div>
         <Link
-          to="/auth"
+          to="/timer"
           className="text-xs text-text-muted hover:text-accent transition-colors"
         >
           Open in browser →
@@ -162,7 +162,7 @@ export function LandingPage() {
                   Windows — {formatMB(winExe.size)}
                 </a>
               )}
-              <Link to="/auth" className="text-text-muted hover:text-accent transition-colors">
+              <Link to="/timer" className="text-text-muted hover:text-accent transition-colors">
                 Use in browser instead →
               </Link>
             </div>
