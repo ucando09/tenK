@@ -14,8 +14,16 @@ export const supabase = createClient(
   supabaseAnonKey || 'placeholder',
   {
     auth: {
-      persistSession: true,
-      autoRefreshToken: true,
+      /* Persistent login: session is written to localStorage on every
+       * change, restored on app boot. In Electron this lives under
+       * %APPDATA%/tenK/ so it survives across launches. Cleared only by
+       * an explicit supabase.auth.signOut(). */
+      persistSession:     true,
+      autoRefreshToken:   true,
+      detectSessionInUrl: true,
+      storage:            typeof window !== 'undefined' ? window.localStorage : undefined,
+      storageKey:         'tenk-auth',
+      flowType:           'pkce',
     },
     realtime: {
       params: {
