@@ -363,23 +363,7 @@ function InstallHelpModal({
             </ol>
           )}
 
-          {isMac && (
-            <ol className="text-xs text-text-secondary space-y-2.5 list-decimal pl-4 leading-relaxed">
-              <li>
-                Open the <code className="font-mono">.dmg</code> and drag <strong>tenK</strong> to Applications.
-              </li>
-              <li>
-                In Applications, <strong>right-click</strong> tenK and choose <strong>"Open"</strong>
-                {' '}(don't double-click the first time).
-              </li>
-              <li>
-                macOS will warn the app is from an unidentified developer. Click <strong>"Open"</strong>.
-              </li>
-              <li>
-                After this first launch, you can double-click tenK normally.
-              </li>
-            </ol>
-          )}
+          {isMac && <MacInstallSteps />}
 
           <p className="text-[11px] text-text-muted mt-4 leading-relaxed">
             These warnings show up for any new app from an indie developer. tenK is open source —{' '}
@@ -407,6 +391,62 @@ function InstallHelpModal({
         </div>
       </div>
     </div>
+  );
+}
+
+/* macOS install steps — handles the "tenK is damaged" Gatekeeper error
+ * by walking the user through stripping the quarantine attribute via
+ * Terminal. We include a copy-to-clipboard button so non-technical
+ * users don't have to type it. */
+function MacInstallSteps() {
+  const CMD = 'xattr -cr /Applications/tenK.app';
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(CMD);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* clipboard blocked — user can still select+copy */ }
+  };
+
+  return (
+    <ol className="text-xs text-text-secondary space-y-2.5 list-decimal pl-4 leading-relaxed">
+      <li>
+        Open the <code className="font-mono">.dmg</code> and drag <strong>tenK</strong> to Applications.
+      </li>
+      <li>
+        Try double-clicking tenK in Applications.{' '}
+        <span className="text-text-muted">If macOS says it's "from an unidentified developer", just click "Open" — you're done.</span>
+      </li>
+      <li>
+        <strong>If you see "tenK is damaged and can't be opened"</strong>, that's a misleading macOS error for unsigned apps. The app is fine — you just need to remove the quarantine flag:
+        <ol className="list-[lower-alpha] pl-5 mt-2 space-y-1.5 text-text-muted">
+          <li>Open <strong>Terminal</strong> (press <kbd className="px-1 py-0.5 rounded bg-bg-elevated border border-border text-[10px] font-mono">⌘ Space</kbd>, type "Terminal", press Enter).</li>
+          <li>
+            Paste this command and press Enter:
+            <div className="mt-1.5 flex items-stretch gap-1.5">
+              <code className="flex-1 font-mono text-[11px] px-2.5 py-1.5 rounded-md bg-bg-elevated border border-border break-all">
+                {CMD}
+              </code>
+              <button
+                onClick={copy}
+                type="button"
+                className="px-2.5 rounded-md text-[10px] font-semibold border transition-colors"
+                style={
+                  copied
+                    ? { color: '#4cdf90', borderColor: '#4cdf9050', backgroundColor: '#4cdf9012' }
+                    : { color: '#7c6cf0', borderColor: '#7c6cf050', backgroundColor: '#7c6cf012' }
+                }
+              >
+                {copied ? '✓ Copied' : 'Copy'}
+              </button>
+            </div>
+          </li>
+          <li>Double-click <strong>tenK</strong> in Applications again — it opens normally.</li>
+        </ol>
+      </li>
+    </ol>
   );
 }
 
