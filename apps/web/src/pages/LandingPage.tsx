@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { useLatestRelease } from '../lib/hooks/useLatestRelease';
 import { detectOS, osLabel, type DetectedOS } from '../lib/detectOS';
+import { FeedbackModal } from '../components/Feedback/FeedbackModal';
 
 /* ── Asset matchers (mirror DownloadPage) ──────────────────────────── */
 const matchMacArm64 = (n: string) => n.endsWith('.dmg') && /arm64/i.test(n);
@@ -41,6 +42,8 @@ export function LandingPage() {
    * the OS warning shows up. */
   const [downloadInfo, setDownloadInfo] = useState<{ os: DetectedOS; fileName: string } | null>(null);
   const onDownload = (os: DetectedOS, fileName: string) => setDownloadInfo({ os, fileName });
+
+  const [showFeedback, setShowFeedback] = useState(false);
 
   /* Resolve installer + size for each platform */
   const macArm = release?.assets.find((a) => matchMacArm64(a.name));
@@ -242,6 +245,12 @@ export function LandingPage() {
         <div className="max-w-5xl mx-auto px-6 py-6 flex items-center justify-between text-xs text-text-dim">
           <span>© tenK</span>
           <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowFeedback(true)}
+              className="hover:text-accent transition-colors"
+            >
+              Feedback
+            </button>
             <Link to="/auth" className="hover:text-accent transition-colors">
               Sign in
             </Link>
@@ -267,6 +276,8 @@ export function LandingPage() {
           onClose={() => setDownloadInfo(null)}
         />
       )}
+
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
     </div>
   );
 }

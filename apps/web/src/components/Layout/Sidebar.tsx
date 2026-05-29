@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Timer, BookOpen, History, Users, User,
-  LogOut, Sun, Moon, ChevronLeft, ChevronRight, MonitorSmartphone,
+  LogOut, Sun, Moon, ChevronLeft, ChevronRight, MonitorSmartphone, MessageSquare,
 } from 'lucide-react';
+import { FeedbackModal } from '../Feedback/FeedbackModal';
 import { supabase } from '../../lib/supabase';
 import { useAppStore } from '../../lib/store';
 import { STORAGE_KEYS } from '../../lib/constants';
@@ -40,6 +41,7 @@ export function Sidebar() {
   const [showAppHint, setShowAppHint] = useState(
     () => localStorage.getItem(STORAGE_KEYS.appDownloadHintDismissed) !== 'true',
   );
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const toggleCollapsed = () => {
     const next = !collapsed;
@@ -184,6 +186,16 @@ export function Sidebar() {
 
       {/* ── Bottom actions ── */}
       <div className={`mt-auto pb-4 space-y-1 flex-shrink-0 ${collapsed ? 'px-1' : 'px-3'}`}>
+        {/* Feedback */}
+        <button
+          onClick={() => setShowFeedback(true)}
+          title={collapsed ? 'Send feedback' : undefined}
+          className={btn('text-text-muted hover:text-accent hover:bg-bg-elevated')}
+        >
+          <MessageSquare size={16} />
+          {!collapsed && 'Send feedback'}
+        </button>
+
         {/* Theme toggle */}
         <button
           onClick={toggleTheme}
@@ -204,6 +216,8 @@ export function Sidebar() {
           {!collapsed && t('nav.signOut')}
         </button>
       </div>
+
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
     </div>
   );
 }
