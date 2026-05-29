@@ -33,7 +33,10 @@ export interface LatestRelease {
 }
 
 const CACHE_KEY = 'tenk-latest-release';
-const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
+// Short TTL so new releases propagate to visitors quickly. GitHub allows
+// 60 unauth API calls per hour per IP — at 5 min cache, a single visitor
+// can refresh 12 times an hour without hitting the limit.
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 export function useLatestRelease(): {
   release: LatestRelease | null;
