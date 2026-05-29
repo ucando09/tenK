@@ -36,8 +36,8 @@
             '--scrollbar-thumb-hover':'#c0c0e0'
           }
         };
-        var t=localStorage.getItem('tenk-theme')||'dark';
-        var vars=T[t]||T.dark;
+        var t=localStorage.getItem('tenk-theme')||'light';
+        var vars=T[t]||T.light;
         var root=document.documentElement;
         for(var k in vars) root.style.setProperty(k,vars[k]);
       })();

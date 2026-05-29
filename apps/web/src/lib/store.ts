@@ -108,7 +108,7 @@ const defaultTimerState: TimerState = {
 
 export const useAppStore = create<AppState>()(
   subscribeWithSelector((set, get) => ({
-    theme: (localStorage.getItem(STORAGE_KEYS.theme) as 'dark' | 'light') ?? 'dark',
+    theme: (localStorage.getItem(STORAGE_KEYS.theme) as 'dark' | 'light') ?? 'light',
     setTheme: (theme) => {
       localStorage.setItem(STORAGE_KEYS.theme, theme);
       // Inject CSS variables as inline styles — highest possible specificity

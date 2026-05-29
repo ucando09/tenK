@@ -30,7 +30,7 @@ function createWindow(): void {
     height:          820,
     minWidth:        960,
     minHeight:       600,
-    backgroundColor: '#08081a', // dark theme bg so launch doesn't flash white
+    backgroundColor: '#f0f0f9', // matches light-theme --bg-deep
     title:           'tenK',
     titleBarStyle:   process.platform === 'darwin' ? 'hiddenInset' : 'default',
     webPreferences: {

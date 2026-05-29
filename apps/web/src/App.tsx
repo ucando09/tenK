@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { useAppStore } from './lib/store';
 import { AppLayout } from './components/Layout/AppLayout';
-import { SplashScreen } from './components/SplashScreen';
 import { AuthPage } from './pages/AuthPage';
 import { TimerPage } from './pages/TimerPage';
 import { SkillsPage } from './pages/SkillsPage';
@@ -28,17 +27,9 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-/* ── Splash timing ────────────────────────────────────────────────────
- * MIN_DISPLAY_MS keeps the splash on screen long enough to actually
- * be seen even when Supabase's cached session resolves in <50ms.
- * FADE_MS must match the SplashScreen's transition duration (1s now). */
-const MIN_DISPLAY_MS = 2200;
-const FADE_MS        = 1000;
-
 export default function App() {
   const [user, setUser]       = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [splashPhase, setSplashPhase] = useState<'showing' | 'fading' | 'hidden'>('showing');
   const { setUserId } = useAppStore();
 
   useEffect(() => {
@@ -58,25 +49,8 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, [setUserId]);
 
-  /* Drive the splash off-screen once auth is resolved AND the minimum
-   * display time has elapsed. The app renders underneath during the
-   * fade-out, so it crossfades onto the splash. */
-  useEffect(() => {
-    if (loading) return;
-    const fadeTimer = setTimeout(() => {
-      setSplashPhase('fading');
-      const removeTimer = setTimeout(() => setSplashPhase('hidden'), FADE_MS);
-      return () => clearTimeout(removeTimer);
-    }, MIN_DISPLAY_MS);
-    return () => clearTimeout(fadeTimer);
-  }, [loading]);
-
-  return (
-    <>
-      {splashPhase !== 'hidden' && <SplashScreen fadeOut={splashPhase === 'fading'} />}
-      {!loading && <AppRoutes user={user} />}
-    </>
-  );
+  if (loading) return null;
+  return <AppRoutes user={user} />;
 }
 
 /* Default "go to the app" URL after sign-in / from auth.
