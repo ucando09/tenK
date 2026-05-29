@@ -51,9 +51,14 @@ export function CreateSkillModal({
       ?? DOMAIN_COLORS[0],
   );
 
-  const [advancedOpen, setAdvancedOpen] = useState(false);
+  // Open by default — exam-prep needs date + weekly schedule to be useful,
+  // so make those fields visible without an extra click.
+  const [advancedOpen, setAdvancedOpen] = useState(true);
+  // Default to exam mode — target audience is university students prepping
+  // for specific exams, not lifetime mastery. Users can still switch to
+  // pure hours mode via Advanced settings.
   const [advanced, setAdvanced] = useState<AdvancedSettingsValue>({
-    goalType:       'hours',
+    goalType:       'exam',
     goalHours:      10_000,
     examDate:       '',
     weeklySchedule: {},
