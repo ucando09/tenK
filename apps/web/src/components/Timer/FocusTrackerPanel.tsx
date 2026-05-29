@@ -67,15 +67,29 @@ export function FocusTrackerPanel({
 
       {!enabled ? (
         <div className="px-4 py-4 text-center">
+          <div
+            className="mb-3 px-2.5 py-1.5 rounded-md text-[10px] font-semibold tracking-wide inline-flex items-center gap-1"
+            style={{ color: '#f0c060', backgroundColor: '#f0c06018', border: '1px solid #f0c06030' }}
+          >
+            🚧 In development
+          </div>
           <p className="text-xs text-white/60 leading-snug">
-            Turn on to have AI watch your screen and adjust your tracked hours when you drift.
+            When finished, AI will watch your screen and adjust your tracked hours when you drift off-task.
           </p>
           <p className="text-[10px] text-white/30 mt-2">
-            Mock mode — screen capture isn't wired yet.
+            Turn on for a UI preview — readings are simulated.
           </p>
         </div>
       ) : (
         <>
+          {/* Preview banner */}
+          <div
+            className="px-3 py-2 text-[10px] font-medium border-b border-white/5 flex items-center gap-1.5"
+            style={{ color: '#f0c060', backgroundColor: '#f0c06010' }}
+          >
+            🚧 Preview — readings are simulated until screen capture lands.
+          </div>
+
           {/* Score */}
           <div className="px-4 py-3 border-b border-white/5">
             <div className="flex items-baseline justify-between mb-1.5">

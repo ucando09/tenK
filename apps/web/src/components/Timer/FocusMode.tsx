@@ -380,14 +380,14 @@ const audio  = useVibeAudio({
 
       <FloatingPanel
         id="tracker"
-        title="AI Focus Watch"
+        title="AI Focus Watch · Preview"
         icon="👁"
         defaultAnchor="bottom-right"
         width={300}
         maxBodyHeight={360}
         defaultCollapsed
         accent="#7c6cf0"
-        collapsedBadge={tracker.enabled ? `${tracker.focusScore}` : 'off'}
+        collapsedBadge={tracker.enabled ? `${tracker.focusScore}` : 'soon'}
       >
         <FocusTrackerPanel
           enabled={tracker.enabled}

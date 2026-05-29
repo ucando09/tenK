@@ -6,7 +6,7 @@
  * is a sibling component in this folder.
  */
 import { useState } from 'react';
-import { X, FileText, Printer } from 'lucide-react';
+import { X, FileText, Printer, Sparkles } from 'lucide-react';
 import { REPORT_PERIODS } from '../../lib/constants';
 import { useReportData } from './useReportData';
 import { printReport } from './printReport';
@@ -39,6 +39,13 @@ export function ReportModal({ isOpen, onClose }: ReportModalProps) {
           <div className="flex items-center gap-3">
             <FileText size={18} className="text-accent" />
             <h2 className="text-text-primary font-semibold text-lg">Focus Report</h2>
+            <span
+              className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full border inline-flex items-center gap-1"
+              style={{ color: '#f0c060', borderColor: '#f0c06050', backgroundColor: '#f0c06012' }}
+            >
+              <Sparkles size={9} />
+              Preview
+            </span>
           </div>
           <div className="flex items-center gap-2">
             {/* Period selector */}
@@ -86,6 +93,18 @@ export function ReportModal({ isOpen, onClose }: ReportModalProps) {
             </div>
           ) : !data ? null : (
             <div className="space-y-6">
+              <div
+                className="rounded-xl px-4 py-3 border flex items-start gap-2.5"
+                style={{ borderColor: '#f0c06030', backgroundColor: '#f0c06010' }}
+              >
+                <Sparkles size={14} className="flex-shrink-0 mt-0.5" style={{ color: '#f0c060' }} />
+                <p className="text-xs leading-relaxed" style={{ color: '#f0c060' }}>
+                  <span className="font-semibold">This report is a preview.</span>
+                  {' '}
+                  Some metrics are still being refined and the layout will change. The numbers below
+                  reflect your real sessions, but treat them as an early look, not the final product.
+                </p>
+              </div>
               <ScoreAndStats data={data} />
 
               <div className="grid grid-cols-2 gap-5">
