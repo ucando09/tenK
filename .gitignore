@@ -26,6 +26,10 @@ web-build/
 apps/desktop/dist-electron/
 apps/desktop/release/
 
+# Keep the desktop app icons (the rest of build/ is ignored above)
+!apps/desktop/build/
+!apps/desktop/build/*
+
 # ──────────────────────────────────────────────────
 # Expo / React Native
 # ──────────────────────────────────────────────────
