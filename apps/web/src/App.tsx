@@ -17,7 +17,9 @@ import type { User } from '@supabase/supabase-js';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { userId } = useAppStore();
-  if (!userId) return <Navigate to="/auth" replace />;
+  // Send guests to the public landing instead of straight to /auth so
+  // first-time visitors at tenk.kr see marketing + download CTA first.
+  if (!userId) return <Navigate to="/get" replace />;
   return <>{children}</>;
 }
 
