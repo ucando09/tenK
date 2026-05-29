@@ -15,7 +15,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Apple, Monitor, ExternalLink, Loader2,
-  Timer, Users, Flame, BarChart3, Sparkles, ChevronDown,
+  Timer, Users, Flame, BarChart3, Sparkles, ChevronDown, Shield,
 } from 'lucide-react';
 import { useLatestRelease } from '../lib/hooks/useLatestRelease';
 import { detectOS, osLabel, type DetectedOS } from '../lib/detectOS';
@@ -34,6 +34,7 @@ export function LandingPage() {
   const { release, loading } = useLatestRelease();
   const detected = useMemo<DetectedOS>(() => detectOS(), []);
   const [showAll, setShowAll] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   /* Resolve installer + size for each platform */
   const macArm = release?.assets.find((a) => matchMacArm64(a.name));
@@ -124,6 +125,58 @@ export function LandingPage() {
             <p className="text-xs text-text-muted mt-1 max-w-sm">
               Mobile apps are still cooking — for now, the desktop app or web version is the best way to use tenK.
             </p>
+          )}
+
+          {/* Install help — explains the OS security warning users will see */}
+          {primary && (primary.os === 'windows' || primary.os === 'mac-arm' || primary.os === 'mac-intel') && (
+            <button
+              onClick={() => setShowHelp((s) => !s)}
+              className="mt-3 flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition-colors"
+            >
+              <Shield size={12} />
+              Seeing a security warning? Click here
+              <ChevronDown
+                size={12}
+                className={`transition-transform ${showHelp ? 'rotate-180' : ''}`}
+              />
+            </button>
+          )}
+
+          {showHelp && primary && (
+            <div
+              className="mt-2 max-w-md text-left rounded-xl p-4 border"
+              style={{ borderColor: '#f0c06030', backgroundColor: '#f0c06010' }}
+            >
+              <p className="text-xs font-semibold mb-2" style={{ color: '#f0c060' }}>
+                This is normal — tenK isn't code-signed yet.
+              </p>
+              {primary.os === 'windows' ? (
+                <ol className="text-xs text-text-secondary space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Windows will say <em>"tenK-Setup… isn't commonly downloaded"</em>. Click <strong>the ⋯ menu</strong> (or "Keep") to keep the file.</li>
+                  <li>Open the installer. SmartScreen may show <em>"Windows protected your PC"</em>.</li>
+                  <li>Click <strong>"More info"</strong> → then <strong>"Run anyway"</strong>.</li>
+                  <li>Follow the installer like any other app.</li>
+                </ol>
+              ) : (
+                <ol className="text-xs text-text-secondary space-y-1.5 list-decimal pl-4 leading-relaxed">
+                  <li>Open the <code>.dmg</code> and drag tenK to Applications.</li>
+                  <li>In Applications, <strong>right-click</strong> tenK and choose <strong>"Open"</strong> (don't double-click the first time).</li>
+                  <li>macOS will warn the app is from an unidentified developer. Click <strong>"Open"</strong>.</li>
+                  <li>After this first launch, double-clicking works normally.</li>
+                </ol>
+              )}
+              <p className="text-[11px] text-text-muted mt-3">
+                These warnings show up for any new app from an indie developer. tenK is open source — feel free to inspect the code on{' '}
+                <a
+                  href="https://github.com/ucando09/tenK"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:underline"
+                >
+                  GitHub
+                </a>.
+              </p>
+            </div>
           )}
 
           {/* Other platforms disclosure */}
