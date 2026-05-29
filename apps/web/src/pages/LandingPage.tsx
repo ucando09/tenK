@@ -55,12 +55,7 @@ export function LandingPage() {
       {/* ── Top bar ── */}
       <header className="max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #7c6cf0, #4cdf90)' }}
-          >
-            <Timer size={16} className="text-white" />
-          </div>
+          <img src="/logo.png" alt="tenK" className="w-8 h-8" />
           <span className="text-text-primary font-bold text-lg tracking-tight">tenK</span>
         </div>
         <Link
