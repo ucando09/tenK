@@ -11,6 +11,7 @@ import { CalendarPage } from './pages/CalendarPage';
 import { GroupsPage } from './pages/GroupsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { DownloadPage } from './pages/DownloadPage';
+import { LandingPage } from './pages/LandingPage';
 import { JoinPage } from './pages/JoinPage';
 import type { User } from '@supabase/supabase-js';
 
@@ -97,6 +98,9 @@ function AppRoutes({ user }: { user: User | null }) {
           <Route path="profile"  element={<ProfilePage />}  />
           <Route path="download" element={<DownloadPage />} />
         </Route>
+
+        {/* Public landing page — share this URL with non-users */}
+        <Route path="/get"        element={<LandingPage />} />
 
         {/* Public invite link — JoinPage handles redirect after auth */}
         <Route path="/join/:code" element={<JoinPage />} />
