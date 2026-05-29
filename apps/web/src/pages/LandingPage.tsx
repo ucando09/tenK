@@ -14,7 +14,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Apple, Monitor, ExternalLink, Loader2,
+  Apple, Monitor, ExternalLink, Loader2, X, Download,
   Timer, Users, Flame, BarChart3, Sparkles, ChevronDown, Shield,
 } from 'lucide-react';
 import { useLatestRelease } from '../lib/hooks/useLatestRelease';
@@ -34,7 +34,13 @@ export function LandingPage() {
   const { release, loading } = useLatestRelease();
   const detected = useMemo<DetectedOS>(() => detectOS(), []);
   const [showAll, setShowAll] = useState(false);
-  const [showHelp, setShowHelp] = useState(false);
+
+  /* When user clicks any download link we still let the browser fetch
+   * the file (the <a href> default), but we ALSO open a modal walking
+   * them through SmartScreen / Gatekeeper so they don't bail when
+   * the OS warning shows up. */
+  const [downloadInfo, setDownloadInfo] = useState<{ os: DetectedOS; fileName: string } | null>(null);
+  const onDownload = (os: DetectedOS, fileName: string) => setDownloadInfo({ os, fileName });
 
   /* Resolve installer + size for each platform */
   const macArm = release?.assets.find((a) => matchMacArm64(a.name));
@@ -98,6 +104,7 @@ export function LandingPage() {
           ) : primary ? (
             <a
               href={primary.asset.url}
+              onClick={() => onDownload(primary.os, primary.asset.name)}
               className="inline-flex items-center gap-2.5 px-7 py-4 rounded-2xl text-base font-semibold text-white transition-all hover:scale-[1.02]"
               style={{
                 background: 'linear-gradient(135deg, #7c6cf0, #5d4dc7)',
@@ -127,57 +134,6 @@ export function LandingPage() {
             </p>
           )}
 
-          {/* Install help — explains the OS security warning users will see */}
-          {primary && (primary.os === 'windows' || primary.os === 'mac-arm' || primary.os === 'mac-intel') && (
-            <button
-              onClick={() => setShowHelp((s) => !s)}
-              className="mt-3 flex items-center gap-1.5 text-xs text-text-muted hover:text-accent transition-colors"
-            >
-              <Shield size={12} />
-              Seeing a security warning? Click here
-              <ChevronDown
-                size={12}
-                className={`transition-transform ${showHelp ? 'rotate-180' : ''}`}
-              />
-            </button>
-          )}
-
-          {showHelp && primary && (
-            <div
-              className="mt-2 max-w-md text-left rounded-xl p-4 border"
-              style={{ borderColor: '#f0c06030', backgroundColor: '#f0c06010' }}
-            >
-              <p className="text-xs font-semibold mb-2" style={{ color: '#f0c060' }}>
-                This is normal — tenK isn't code-signed yet.
-              </p>
-              {primary.os === 'windows' ? (
-                <ol className="text-xs text-text-secondary space-y-1.5 list-decimal pl-4 leading-relaxed">
-                  <li>Windows will say <em>"tenK-Setup… isn't commonly downloaded"</em>. Click <strong>the ⋯ menu</strong> (or "Keep") to keep the file.</li>
-                  <li>Open the installer. SmartScreen may show <em>"Windows protected your PC"</em>.</li>
-                  <li>Click <strong>"More info"</strong> → then <strong>"Run anyway"</strong>.</li>
-                  <li>Follow the installer like any other app.</li>
-                </ol>
-              ) : (
-                <ol className="text-xs text-text-secondary space-y-1.5 list-decimal pl-4 leading-relaxed">
-                  <li>Open the <code>.dmg</code> and drag tenK to Applications.</li>
-                  <li>In Applications, <strong>right-click</strong> tenK and choose <strong>"Open"</strong> (don't double-click the first time).</li>
-                  <li>macOS will warn the app is from an unidentified developer. Click <strong>"Open"</strong>.</li>
-                  <li>After this first launch, double-clicking works normally.</li>
-                </ol>
-              )}
-              <p className="text-[11px] text-text-muted mt-3">
-                These warnings show up for any new app from an indie developer. tenK is open source — feel free to inspect the code on{' '}
-                <a
-                  href="https://github.com/ucando09/tenK"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-accent hover:underline"
-                >
-                  GitHub
-                </a>.
-              </p>
-            </div>
-          )}
 
           {/* Other platforms disclosure */}
           {release && (
@@ -196,17 +152,29 @@ export function LandingPage() {
           {showAll && release && (
             <div className="mt-3 flex flex-col gap-1.5 text-xs">
               {macArm && primary?.os !== 'mac-arm' && (
-                <a href={macArm.url} className="text-text-muted hover:text-accent transition-colors">
+                <a
+                  href={macArm.url}
+                  onClick={() => onDownload('mac-arm', macArm.name)}
+                  className="text-text-muted hover:text-accent transition-colors"
+                >
                   Mac (Apple Silicon) — {formatMB(macArm.size)}
                 </a>
               )}
               {macInt && primary?.os !== 'mac-intel' && (
-                <a href={macInt.url} className="text-text-muted hover:text-accent transition-colors">
+                <a
+                  href={macInt.url}
+                  onClick={() => onDownload('mac-intel', macInt.name)}
+                  className="text-text-muted hover:text-accent transition-colors"
+                >
                   Mac (Intel) — {formatMB(macInt.size)}
                 </a>
               )}
               {winExe && primary?.os !== 'windows' && (
-                <a href={winExe.url} className="text-text-muted hover:text-accent transition-colors">
+                <a
+                  href={winExe.url}
+                  onClick={() => onDownload('windows', winExe.name)}
+                  className="text-text-muted hover:text-accent transition-colors"
+                >
                   Windows — {formatMB(winExe.size)}
                 </a>
               )}
@@ -269,6 +237,143 @@ export function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ── Install-help modal, opens automatically on any download click ── */}
+      {downloadInfo && (
+        <InstallHelpModal
+          os={downloadInfo.os}
+          fileName={downloadInfo.fileName}
+          onClose={() => setDownloadInfo(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+/* ── Install help modal ──────────────────────────────────────────────
+ * Pops up the moment user clicks any download link. The file is already
+ * downloading via the <a> default; this just tells them what to do once
+ * they double-click the installer so they don't bail on the security
+ * warning. */
+function InstallHelpModal({
+  os, fileName, onClose,
+}: {
+  os:       DetectedOS;
+  fileName: string;
+  onClose:  () => void;
+}) {
+  const isWin = os === 'windows';
+  const isMac = os === 'mac-arm' || os === 'mac-intel';
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center px-4 py-6 overflow-y-auto"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="bg-bg-card border border-border rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-border">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: '#7c6cf022', color: '#7c6cf0' }}
+            >
+              <Download size={16} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-text-primary font-semibold text-sm leading-tight">
+                Your download is starting…
+              </p>
+              <p className="text-[11px] text-text-dim truncate font-mono mt-0.5">
+                {fileName}
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-md text-text-muted hover:text-text-secondary hover:bg-bg-elevated transition-colors flex-shrink-0"
+            aria-label="Close"
+          >
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 py-4">
+          <div
+            className="rounded-xl px-3 py-2.5 border flex items-start gap-2 mb-4"
+            style={{ borderColor: '#f0c06030', backgroundColor: '#f0c06010' }}
+          >
+            <Shield size={14} className="flex-shrink-0 mt-0.5" style={{ color: '#f0c060' }} />
+            <p className="text-xs leading-relaxed" style={{ color: '#f0c060' }}>
+              <strong>Heads up:</strong> tenK isn't code-signed yet, so your OS will show a security warning. It's safe — here's how to get past it.
+            </p>
+          </div>
+
+          {isWin && (
+            <ol className="text-xs text-text-secondary space-y-2.5 list-decimal pl-4 leading-relaxed">
+              <li>
+                <strong>In your browser</strong>, the download bar may say
+                <em> "{fileName} isn't commonly downloaded"</em>. Click the
+                <strong> ⋯ menu</strong> next to it and choose <strong>"Keep"</strong>.
+              </li>
+              <li>
+                <strong>Open the installer.</strong> Windows SmartScreen may show
+                <em> "Windows protected your PC"</em>.
+              </li>
+              <li>
+                Click <strong>"More info"</strong>, then <strong>"Run anyway"</strong>.
+              </li>
+              <li>
+                Follow the installer like any other Windows app.
+              </li>
+            </ol>
+          )}
+
+          {isMac && (
+            <ol className="text-xs text-text-secondary space-y-2.5 list-decimal pl-4 leading-relaxed">
+              <li>
+                Open the <code className="font-mono">.dmg</code> and drag <strong>tenK</strong> to Applications.
+              </li>
+              <li>
+                In Applications, <strong>right-click</strong> tenK and choose <strong>"Open"</strong>
+                {' '}(don't double-click the first time).
+              </li>
+              <li>
+                macOS will warn the app is from an unidentified developer. Click <strong>"Open"</strong>.
+              </li>
+              <li>
+                After this first launch, you can double-click tenK normally.
+              </li>
+            </ol>
+          )}
+
+          <p className="text-[11px] text-text-muted mt-4 leading-relaxed">
+            These warnings show up for any new app from an indie developer. tenK is open source —{' '}
+            <a
+              href="https://github.com/ucando09/tenK"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-accent hover:underline"
+            >
+              inspect the code on GitHub
+            </a>{' '}
+            anytime.
+          </p>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 py-3 bg-bg-elevated border-t border-border flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-lg text-xs font-semibold text-white transition-all"
+            style={{ background: 'linear-gradient(135deg, #7c6cf0, #5d4dc7)' }}
+          >
+            Got it
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
