@@ -1,6 +1,6 @@
 {
   "name": "@tenk/desktop",
-  "version": "1.0.2",
+  "version": "1.0.7",
   "description": "tenK desktop app — Electron wrapper around the web build.",
   "private": true,
   "main": "dist-electron/main.js",
