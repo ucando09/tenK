@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  // Relative asset URLs so the same `dist/` works in both the web deploy
+  // (served from "/") and the Electron build (loaded via file://).
+  base: './',
   plugins: [react()],
   resolve: {
     alias: {

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import { useAppStore } from './lib/store';
 import { AppLayout } from './components/Layout/AppLayout';
@@ -20,6 +20,11 @@ import type { User } from '@supabase/supabase-js';
  * (Electron — user already installed it; landing would be confusing). */
 const isDesktop =
   typeof window !== 'undefined' && !!(window as { tenkDesktop?: { isDesktop: boolean } }).tenkDesktop?.isDesktop;
+
+/* BrowserRouter relies on HTML5 history + a real server. Electron loads
+ * index.html over file:// so history-based routes 404 on refresh / deep
+ * link. HashRouter (#/foo) works on file:// out of the box. */
+const Router = isDesktop ? HashRouter : BrowserRouter;
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { userId } = useAppStore();
@@ -60,7 +65,7 @@ const APP_HOME = isDesktop ? '/' : '/timer';
 
 function AppRoutes({ user }: { user: User | null }) {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
         {/* ── Public ────────────────────────────────────────────────── */}
         <Route
@@ -116,6 +121,6 @@ function AppRoutes({ user }: { user: User | null }) {
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
