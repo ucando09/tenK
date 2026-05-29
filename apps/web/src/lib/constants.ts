@@ -47,9 +47,11 @@ export const STORAGE_KEYS = {
   visualStyle:              'tenk-visual-style',
 } as const;
 
+const AUDIO_BASE = 'https://pub-572c6473885a4e6480b41de56d9ebd93.r2.dev';
+
 /* ── Study-with-Me vibes ─────────────────────────────────────────────
  * Each vibe pairs:
- *   - one or more audio file paths (drop MP3s into `public/audio/`)
+ *   - one or more audio file paths served from Cloudflare R2
  *   - a CSS-only "scene" used as the focus-mode background
  *
  * `audioSrc` accepts either a single path (one track on loop) OR an
@@ -90,22 +92,22 @@ export const STUDY_VIBES: StudyVibe[] = [
   /* Single-track vibes (one MP3, looped). Drop the file at the given
    * path under `public/`. To add multiple tracks for a vibe, swap the
    * string for an array — see the lo-fi entry below for the shape. */
-  { id: 'fireplace', label: 'Fireplace',   icon: '🔥', blurb: 'Crackling fire, warm glow.',          swatch: '#f0906c', scene: 'fireplace',  audioSrc: '/audio/fireplace.mp3' },
-  { id: 'forest',    label: 'Forest',      icon: '🌲', blurb: 'Wind through pines, distant birds.', swatch: '#4cdf90', scene: 'forest',     audioSrc: '/audio/forest.mp3' },
-  { id: 'library',   label: 'Library',     icon: '📚', blurb: 'Pages turning, distant footsteps.',  swatch: '#a0cf60', scene: 'library',    audioSrc: '/audio/library.mp3' },
-  { id: 'cafe',      label: 'Coffee Shop', icon: '☕', blurb: 'Cup clinks, gentle chatter.',        swatch: '#f0906c', scene: 'cafe',       audioSrc: '/audio/cafe.mp3' },
-  { id: 'rain',      label: 'Rainfall',    icon: '🌧️', blurb: 'Soft rain on a window.',             swatch: '#60b8f0', scene: 'rain',       audioSrc: '/audio/rain.mp3' },
+  { id: 'fireplace', label: 'Fireplace',   icon: '🔥', blurb: 'Crackling fire, warm glow.',          swatch: '#f0906c', scene: 'fireplace',  audioSrc: `${AUDIO_BASE}/fireplace.mp3` },
+  { id: 'forest',    label: 'Forest',      icon: '🌲', blurb: 'Wind through pines, distant birds.', swatch: '#4cdf90', scene: 'forest',     audioSrc: `${AUDIO_BASE}/forest.mp3` },
+  { id: 'library',   label: 'Library',     icon: '📚', blurb: 'Pages turning, distant footsteps.',  swatch: '#a0cf60', scene: 'library',    audioSrc: `${AUDIO_BASE}/library.mp3` },
+  { id: 'cafe',      label: 'Coffee Shop', icon: '☕', blurb: 'Cup clinks, gentle chatter.',        swatch: '#f0906c', scene: 'cafe',       audioSrc: `${AUDIO_BASE}/cafe.mp3` },
+  { id: 'rain',      label: 'Rainfall',    icon: '🌧️', blurb: 'Soft rain on a window.',             swatch: '#60b8f0', scene: 'rain',       audioSrc: `${AUDIO_BASE}/rain.mp3` },
 
   { id: 'lofi',      label: 'Lo-Fi Beats', icon: '🎧', blurb: 'Mellow hip-hop study mix.',           swatch: '#7c6cf0', scene: 'lofi-night',
-    audioSrc: '/audio/lofi-1.mp3',
+    audioSrc: `${AUDIO_BASE}/lofi-1.mp3`,
   },
 
   { id: 'minecraft',    label: 'Minecraft',    icon: '⛏️', blurb: 'Calm night in the overworld.',        swatch: '#55aa33', scene: 'minecraft',
-    audioSrc: '/audio/minecraft.mp3',
+    audioSrc: `${AUDIO_BASE}/minecraft.mp3`,
   },
 
   { id: 'interstellar', label: 'Interstellar', icon: '🌌', blurb: 'Vast silence between the stars.',      swatch: '#c87941', scene: 'interstellar',
-    audioSrc: '/audio/interstellar.mp3',
+    audioSrc: `${AUDIO_BASE}/interstellar.mp3`,
   },
 ];
 
