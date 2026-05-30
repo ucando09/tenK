@@ -2,6 +2,33 @@
  * Shared utility functions used across the web app.
  */
 
+/** Plays a single soft bell tone using the Web Audio API. */
+export function playBell() {
+  const ctx = new AudioContext();
+  // Browsers start AudioContext suspended when created outside a user gesture.
+  // resume() succeeds here because the user already clicked Start earlier in
+  // the session. All scheduling must happen after the context is running.
+  ctx.resume().then(() => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 1.8);
+
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
+
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 2.2);
+    osc.onended = () => ctx.close();
+  });
+}
+
 /**
  * Extracts a human-readable message from any thrown value.
  *

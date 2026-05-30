@@ -12,6 +12,7 @@ import { GroupDetail } from '../components/Groups/GroupDetail';
 import { GroupRow } from '../components/Groups/GroupRow';
 import { useAppStore } from '../lib/store';
 import { useTimer } from '../lib/hooks/useTimer';
+import { playBell } from '../lib/utils';
 import { useGroups } from '../lib/hooks/useGroups';
 import { useStudyBuddies } from '../lib/hooks/useStudyBuddies';
 import type { SessionGoal } from '../lib/store';
@@ -67,6 +68,7 @@ export function TimerPage() {
   //   - stopwatch: never — stopwatch counts UP and is ended manually
   const handlePhaseEnd = useCallback(() => {
     if (!displaySkill) return;
+    playBell();
 
     /* Countdown — one block, then we're done */
     if (sessionTimerConfig.mode === 'countdown') {
