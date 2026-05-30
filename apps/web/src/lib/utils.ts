@@ -2,31 +2,48 @@
  * Shared utility functions used across the web app.
  */
 
+// Singleton AudioContext. Must be unlocked from a user gesture before use.
+let _audioCtx: AudioContext | null = null;
+
+function getAudioCtx(): AudioContext {
+  if (!_audioCtx || _audioCtx.state === 'closed') {
+    _audioCtx = new AudioContext();
+  }
+  return _audioCtx;
+}
+
+/**
+ * Call this synchronously inside any user-gesture handler (e.g. the Start
+ * button click) to unlock the AudioContext for the rest of the session.
+ * resume() only succeeds when called within a user gesture on a fresh context.
+ */
+export function unlockAudio() {
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+}
+
 /** Plays a single soft bell tone using the Web Audio API. */
 export function playBell() {
-  const ctx = new AudioContext();
-  // Browsers start AudioContext suspended when created outside a user gesture.
-  // resume() succeeds here because the user already clicked Start earlier in
-  // the session. All scheduling must happen after the context is running.
-  ctx.resume().then(() => {
+  const ctx = getAudioCtx();
+  const schedule = () => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
     osc.connect(gain);
     gain.connect(ctx.destination);
-
     osc.type = 'sine';
     osc.frequency.setValueAtTime(880, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 1.8);
-
     gain.gain.setValueAtTime(0, ctx.currentTime);
     gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.012);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
-
     osc.start(ctx.currentTime);
     osc.stop(ctx.currentTime + 2.2);
-    osc.onended = () => ctx.close();
-  });
+  };
+  if (ctx.state === 'running') {
+    schedule();
+  } else {
+    ctx.resume().then(schedule).catch(() => {});
+  }
 }
 
 /**

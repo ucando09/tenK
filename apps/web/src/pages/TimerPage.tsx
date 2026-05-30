@@ -12,7 +12,7 @@ import { GroupDetail } from '../components/Groups/GroupDetail';
 import { GroupRow } from '../components/Groups/GroupRow';
 import { useAppStore } from '../lib/store';
 import { useTimer } from '../lib/hooks/useTimer';
-import { playBell } from '../lib/utils';
+import { playBell, unlockAudio } from '../lib/utils';
 import { useGroups } from '../lib/hooks/useGroups';
 import { useStudyBuddies } from '../lib/hooks/useStudyBuddies';
 import type { SessionGoal } from '../lib/store';
@@ -121,6 +121,7 @@ export function TimerPage() {
 
   // Called by GoalModal — stores goals then starts the timer
   const handleGoalStart = useCallback(async (goals: SessionGoal[]) => {
+    unlockAudio(); // must be synchronous, before any await, to stay within the user gesture
     setSessionGoals(goals);
     await handleStart();
     setShowGoalModal(false);
