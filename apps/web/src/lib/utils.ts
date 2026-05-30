@@ -22,22 +22,35 @@ export function unlockAudio() {
   if (ctx.state === 'suspended') ctx.resume();
 }
 
-/** Plays a single soft bell tone using the Web Audio API. */
+/** Plays a restaurant-style desk bell "ding" using additive synthesis. */
 export function playBell() {
   const ctx = getAudioCtx();
   const schedule = () => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(880, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(440, ctx.currentTime + 1.8);
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.012);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 2.2);
-    osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 2.2);
+    const t = ctx.currentTime;
+    const master = ctx.createGain();
+    master.gain.value = 0.5;
+    master.connect(ctx.destination);
+
+    // Three inharmonic partials (bell-like ratios, not exact multiples)
+    // Higher partials decay faster, giving the characteristic bell envelope
+    const partials = [
+      { freq: 1200, gain: 0.6,  decay: 1.6 },
+      { freq: 2860, gain: 0.35, decay: 0.8 },
+      { freq: 4320, gain: 0.15, decay: 0.4 },
+    ];
+    partials.forEach(({ freq, gain, decay }) => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(gain, t + 0.003); // sharp attack
+      g.gain.exponentialRampToValueAtTime(0.001, t + decay);
+      osc.connect(g);
+      g.connect(master);
+      osc.start(t);
+      osc.stop(t + decay + 0.05);
+    });
   };
   if (ctx.state === 'running') {
     schedule();
